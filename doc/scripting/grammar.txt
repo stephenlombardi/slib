@@ -1,0 +1,41 @@
+program -> expr_list
+
+expr_list -> expr ; expr_list
+			| expr ;
+			|
+			
+expr -> func_decl
+		| assign_expr
+		| if_stmt
+		| while_stmt
+		| fn_call
+		| IDENTIFIER
+		| INTEGER
+		| FLOAT
+		| BOOL
+		| STRINGCONST
+		
+func_decl -> function ( param_list ) { expr_list }
+	
+assign_expr -> IDENTIFIER = expr
+
+if_stmt -> if ( expr ) { expr_list } else { expr_list }
+
+while_stmt -> while ( expr ) { expr_list }
+		
+param_list -> IDENTIFIER , param_list
+			| IDENTIFIER
+			|
+			
+fn_call -> IDENTIFIER ( arg_list )
+
+arg_list -> expr , arg_list
+			| expr
+			|
+
+COMMENT -> #[^\n]*\n
+IDENTIFIER -> [a-zA-Z_][a-zA-Z0-9_]*
+INTEGER -> ([0-9]|+|-)[0-9]*
+FLOAT -> ([0-9]|+|-)[0-9]*(.[0-9]*)?
+BOOL -> (false)|(true)
+STRINGCONST -> \"(\\.|[^"])*\"

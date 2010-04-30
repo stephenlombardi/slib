@@ -1,0 +1,12 @@
+walk1 2 20
+walk2 22 36
+damage1 38 47
+damage2 48 57
+death1 59 75
+dead1 78 88
+death2 91 103
+attack1 106 115
+attack2 117 128
+attack3 129 136
+idle1 137 169
+idle2 170 200

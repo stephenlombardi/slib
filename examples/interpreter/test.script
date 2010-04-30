@@ -1,0 +1,122 @@
+print ( "example script" );
+
+# simple examples
+
+# output: 10
+print( add( 1, 2, 3, 4 ) );
+
+# output: 24
+print( mult( 1, 2, 3, 4 ) );
+
+# built-in functions:
+#
+# add( a, b, c, ... )
+#   if a, b, c, ... are integers or floats
+#      a + b + c + ...
+#   if a, b, c, ... are booleans
+#      a || b || c || ...
+#   if a, b, c, ... are strings
+#      concatenation of a, b, c, ...
+#
+# mult( a, b, c, ... )
+#   if a, b, c, ... are integers or floats
+#      a * b * c * ... 
+#   if a, b, c, ... are booleans
+#      a && b && c ...
+#
+# addinverse( a )
+#   if a is an integer or float
+#      -a
+#   if a is boolean
+#      !a
+#
+# multinverse( a )
+#   if a is a float
+#      a^-1
+#
+# equal( a, b, c, ... )
+#   if a, b, c, ... are booleans
+#      returns true if a == b and b == c ...
+#
+# print( a, b, c, ... ) 
+#   prints a, b, c, to stdout
+#
+# pow( a, b )
+#   if a, b are floats
+#      a^b
+#
+
+# assign the new variable foo to the function add
+foo = add;
+
+# use foo as if it were the function add
+# multiple assignments per line
+y = x = foo ( 1., +2., -3.5 );
+
+# output: -0.5
+print( x );
+
+# create a new function called bar
+bar = function( a ) {
+	# create a new function called mult
+	# this will overwrite the current definition of mult
+	# but once the call to bar is over, mult will
+	# be back to it's original value
+	mult = function( x, y ) {
+		# rename the mult function so that it adds
+		return = add( x, y );
+	};
+
+	# functions return values by assigning the variable named return
+	return = mult( 1, 2 );
+}; # all lines end with a semicolon
+
+# output: 3
+print ( bar ( 5 ) );
+
+# mult is back to it's original value
+# output: 100
+print ( mult( 10, 10 ) );
+
+# variables can be reassigned different types
+foo = 5; 
+
+# output: -5
+print( addinverse( foo ) );
+
+# while loop
+# output: 5 4 3 2 1
+while( addinverse( equal( foo, 0 ) ) ) {
+	print( foo );
+
+	# arithmetic is clusmy because there
+	# isn't support for infix operators
+	foo = add( foo, -1 );
+};
+# while loops end with semicolons
+
+# simple if statement
+# must include else clause and end with semicolon
+if( true ) {
+	print ( "boolean constant" );
+} else { };
+
+# power function
+_z_ = pow( 2., 3. );
+
+# output: 8
+print( _z_) ;
+
+# create a factorial function
+factorial = function( a ) {
+	if( equal( a, 0 ) ) {
+		return = 1;
+	} else {
+		return = mult( a, factorial( add( a, -1 ) ) );
+	};
+};
+
+# output: 120
+print( factorial( 5 ) );
+
+

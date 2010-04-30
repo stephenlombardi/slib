@@ -1,0 +1,27 @@
+<html>
+<body>
+
+<h1>kdTree.hpp</h1>
+
+Classes:
+<ul>
+	<li>kd::Plane&lt; dimension, fieldtype &gt;</li>
+	<li>kd::Tree&lt; dimension, intersectiontype, primitivetype &gt;</li>
+	<li>kd::Tree&lt; dimension, intersectiontype, primitivetype &gt;::Node</li>
+</ul>
+
+Required primitivetype methods:
+<ul>
+	<li>fieldtype primitivetype::LeastDistance( const kd::Plane&lt; dimension, fieldtype &gt; & plane ) const</li>
+	<li>fieldtype primitivetype::GreatestDistance( const kd::Plane&lt; dimension, fieldtype &gt; & plane ) const</li>
+	<li>intersectiontype primitivetype::IntersectLine( const Matrix&lt; dimension, 1, fieldtype &gt; & start, const Matrix&lt; dimension, 1, fieldtype &gt; & end, OffsetCalcT offsetcalc ) const</li>
+</ul>
+
+Required intersectiontype methods:
+<ul>
+	<li>bool intersectiontype::Intersection( ) const</li>
+	<li>fieldtype intersectiontype::RayDistance( ) const</li>
+</ul>
+
+</body>
+</html>

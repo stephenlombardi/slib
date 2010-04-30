@@ -1,0 +1,22 @@
+<html>
+<body>
+
+<h1>PlanarVolume.hpp</h1>
+
+Classes:
+<ul>
+	<li>PlanarVolume&lt; dimension, fieldtype, planetype &gt;</li>
+	<li>PlanarVolumeIntersection&lt; dimension, fieldtype, planetype &gt;</li>
+	<li>PlanarPolygon&lt; dimension, fieldtype, planetype &gt;</li>
+</ul>
+
+Required planetype methods:
+<ul>
+	<li>fieldtype planetype::IntersectRay( const Matrix&lt; dimension, 1, fieldtype > & start, const Matrix&lt; dimension, 1, fieldtype &gt; & direction ) const</li>
+	<li>fieldtype planetype::Distance( const Matrix&lt; dimension, 1, fieldtype &gt; & point ) const</li>
+	<li>Matrix&lt; dimension, 1, fieldtype &gt; planetype::GetNormal( ) const</li>
+	<li>fieldtype planetype::GetDistance( ) const</li>
+</ul>
+
+</body>
+</html>
