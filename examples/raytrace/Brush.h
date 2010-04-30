@@ -9,12 +9,6 @@
 using namespace slib;
 
 struct BrushIntersection {
-	/*BrushIntersection( );
-	BrushIntersection( const PlanarVolume< 3, float, Plane< 3, float > > * _brush, const PlanarVolumeIntersection< 3, float, Plane< 3, float > > & _intersection );
-
-	bool Intersection( ) const;
-	float RayDistance( ) const;*/
-
 	BrushIntersection( ) : brush( 0 ), intersection( PlanarVolumeIntersection< 3, float, Plane< 3, float > >( -std::numeric_limits< float >::infinity( ), std::numeric_limits< float >::infinity( ), 0, 0 ) ) {
 	}
 
@@ -22,12 +16,10 @@ struct BrushIntersection {
 	}
 
 	bool Intersection( ) const {
-		//return intersection.Intersection( );
 		return intersection.enterplane;
 	}
 
 	float RayDistance( ) const {
-		//return intersection.t;
 		return intersection.enterplane ? intersection.enterfraction : std::numeric_limits< float >::infinity( );
 	}
 

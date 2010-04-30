@@ -156,7 +156,7 @@ int main( int argc, char ** argv ) {
 				}
 			}
 			
-			std::cout << ( std::clock( ) - starttime ) << std::endl;
+			std::cout << "rendering time: " << ( std::clock( ) - starttime ) / 1000000.0f << " seconds" << std::endl;
 
 			std::ofstream tgastream( argv[ 11 ], std::ios::binary );
 			WriteTGA( tgastream, width, height, 24, tgadata );
