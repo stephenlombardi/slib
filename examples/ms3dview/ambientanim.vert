@@ -1,4 +1,4 @@
-#version 150
+#version 120
 
 uniform mat4 model;
 uniform mat4 view;
@@ -10,7 +10,7 @@ in vec3 in_Normal;
 in vec2 in_Texcoord;
 in float in_Boneid;
 
-out vec2 ex_Texcoord;
+varying vec2 ex_Texcoord;
 
 void main( void ) {
 	gl_Position = projection * view * model * bonematrices[ int( in_Boneid ) ] * vec4(in_Position, 1.0);

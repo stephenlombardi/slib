@@ -12,8 +12,8 @@
 #ifndef SLIB_EXTENSIONS_H
 #define SLIB_EXTENSIONS_H
 
-#include <gl/freeglut.h>
-#include <slib/glext.h>
+#include <GL/freeglut.h>
+#include <GL/glext.h>
 
 namespace slib {
 
@@ -37,7 +37,7 @@ namespace slib {
 	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-	extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+	//extern PFNGLACTIVETEXTUREPROC glActiveTexture;
 
 	extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;

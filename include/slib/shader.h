@@ -100,8 +100,9 @@
 #ifndef SLIB_SHADER_H
 #define SLIB_SHADER_H
 
-#include <gl/freeglut.h>
-#include <slib/glext.h>
+#include <GL/freeglut.h>
+#include <GL/glext.h>
+
 #include <slib/extensions.h>
 
 #include <map>

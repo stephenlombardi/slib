@@ -80,8 +80,9 @@
 
 #include <vector>
 
-#include <gl/freeglut.h>
-#include <slib/glext.h>
+#include <GL/freeglut.h>
+#include <GL/glext.h>
+
 #include <slib/extensions.h>
 
 namespace slib {

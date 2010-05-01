@@ -1,10 +1,11 @@
-#ifndef _OpenGLText_h
-#define _OpenGLText_h
+#ifndef SLIB_OPENGLTEXT_H
+#define SLIB_OPENGLTEXT_H
 
 #include <string>
 
-#include <gl/freeglut.h>
-#include <slib/glext.h>
+#include <GL/freeglut.h>
+#include <GL/glext.h>
+
 #include <slib/extensions.h>
 
 #include <slib/Matrix.hpp>
