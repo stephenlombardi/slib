@@ -2,9 +2,9 @@
 
 namespace slib {
 
-	void MenuRendererOpenGL::init( const std::string & letterstexpath );
+	void MenuRendererOpenGL::init( const std::string & letterstexpath ) {
 		const std::string projAttribs[] = { "in_Position" };
-		threedShader.initShader( 
+		threedShader_.initShader( 
 			"#version 140\n\n"
 			"uniform mat4 model;\n"
 			"uniform mat4 view;\n"
@@ -20,13 +20,13 @@ namespace slib {
 			"	out_Color = color;\n"
 			"}\n", 
 			projAttribs, projAttribs + 1, true );
-		threedShader.getUniform( "model" );
-		threedShader.getUniform( "view" );
-		threedShader.getUniform( "projection" );
-		threedShader.getUniform( "color" );
+		threedShader_.getUniform( "model" );
+		threedShader_.getUniform( "view" );
+		threedShader_.getUniform( "projection" );
+		threedShader_.getUniform( "color" );
 
 		const std::string threedtexAttribs[] = { "in_Position", "in_Texcoord" };
-		threedtexShader.initShader( 
+		threedtexShader_.initShader( 
 			"#version 140\n\n"
 			"uniform mat4 model;\n"
 			"uniform mat4 view;\n"
@@ -46,10 +46,10 @@ namespace slib {
 			"	out_Color = texture2D( texture, ex_Texcoord );\n"
 			"}\n",
 			threedtexAttribs, threedtexAttribs + 2, true );
-		threedtexShader.getUniform( "model" );
-		threedtexShader.getUniform( "view" );
-		threedtexShader.getUniform( "projection" );
-		threedtexShader.getUniform( "texture" );
+		threedtexShader_.getUniform( "model" );
+		threedtexShader_.getUniform( "view" );
+		threedtexShader_.getUniform( "projection" );
+		threedtexShader_.getUniform( "texture" );
 
 		{
 			float verts [] = { 
@@ -103,8 +103,8 @@ namespace slib {
 		textquad_.destroyVAO( );
 		screenquad_.destroyVAO( );
 
-		threedtexShader.destroyShader( );
-		threedShader.destroyShader( );
+		threedtexShader_.destroyShader( );
+		threedShader_.destroyShader( );
 	}
 
 	void MenuRendererOpenGL::drawBox( const vec2f & position, const vec2f & dimensions, const vec4f & color ) {
