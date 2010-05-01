@@ -386,7 +386,7 @@ namespace slib {
 		public:
 			ConvolveView( const ViewT< T > & _view, float * _kernel, int _kwidth, int _kheight ) : view( _view ), kernel( _kernel ), kwidth( _kwidth ), kheight( _kheight ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				// rewrite using itertors
 				float sum = 0.0f;
 				for( int i = 0, py = y - kheight; py <= y + kheight; py++ ) {
@@ -411,7 +411,7 @@ namespace slib {
 		public:
 			CylindricalReprojectionView( const ViewT< T > & _view, int _focallength ) : view( _view ), focallength( _focallength ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				float cylinderx = ( x - view.getWidth( ) / 2.0f ) / focallength, cylindery = ( y - view.getHeight( ) / 2.0f ) / focallength;
 				float threedx = sin( cylinderx ), threedy = cylindery;
 				float normalizedx = threedx / sqrt( 1.0f - threedx * threedx ), normalizedy = threedy / sqrt( 1.0f - threedx * threedx );
@@ -432,7 +432,7 @@ namespace slib {
 		public:
 			UndistortedView( const ViewT< T > & _view, int _focallength, float _k1, float _k2 ) : view( _view ), focallength( _focallength ), k1( _k1 ), k2( _k2 ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				float normalizedx = ( x - view.getWidth( ) / 2.0f ) / focallength, normalizedy = ( y - view.getHeight( ) / 2.0f ) / focallength;
 				float r = sqrt( normalizedx * normalizedx + normalizedy * normalizedy );
 				float radialdist = 1.0f + k1 * r * r + k2 * r * r * r * r;
@@ -455,7 +455,7 @@ namespace slib {
 		public:
 			DerivativeXView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				// central differences operator
 				return ( view( x + 1, y, c ) - view( x - 1, y, c ) ) / 2;
 				//return view( x, y, c );
@@ -473,7 +473,7 @@ namespace slib {
 		public:
 			DerivativeYView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				// central differences operator
 				return ( view( x, y + 1, c ) - view( x, y - 1, c ) ) / 2;
 				//return view( x, y, c );
