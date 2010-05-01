@@ -1,5 +1,7 @@
 all:
+	(cd collisiontest; make)
 	(cd ms3dinfo; make)
+	(cd ms3dview; make)
 	(cd raytrace; make)
 	(cd testimage; make)
 	(cd testkdtree; make)
@@ -9,7 +11,9 @@ all:
 	(cd testtga; make)
 
 clean:
+	(cd collisiontest; make clean)
 	(cd ms3dinfo; make clean)
+	(cd ms3dview; make clean)
 	(cd raytrace; make clean)
 	(cd testimage; make clean)
 	(cd testkdtree; make clean)
