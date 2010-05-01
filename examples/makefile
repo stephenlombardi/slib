@@ -1,5 +1,6 @@
 all:
 	(cd collisiontest; make)
+	(cd interpreter; make)
 	(cd ms3dinfo; make)
 	(cd ms3dview; make)
 	(cd raytrace; make)
@@ -12,6 +13,7 @@ all:
 
 clean:
 	(cd collisiontest; make clean)
+	(cd interpreter; make clean)
 	(cd ms3dinfo; make clean)
 	(cd ms3dview; make clean)
 	(cd raytrace; make clean)

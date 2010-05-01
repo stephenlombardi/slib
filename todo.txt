@@ -1,11 +1,5 @@
-Image/TGA:
-	write example program
-
 kdtree:
 	implement IntersectRay method
 
-Matrix:
-	file for printing to streams
-
-PlanarVolume:
-	put asserts in test file
+Scripting:
+	fix recursive function problem
