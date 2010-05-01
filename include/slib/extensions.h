@@ -37,7 +37,10 @@ namespace slib {
 	extern PFNGLDELETEPROGRAMPROC glDeleteProgram;
 	extern PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	extern PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-	//extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+
+	#if defined ( _WIN32 )
+		extern PFNGLACTIVETEXTUREPROC glActiveTexture;
+	#endif
 
 	extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;

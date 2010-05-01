@@ -33,7 +33,10 @@ namespace slib {
 		glDeleteProgram = (PFNGLDELETEPROGRAMPROC)GETEXTENSIONADDRESS( "glDeleteProgram" );
 		glGetShaderInfoLog = (PFNGLGETSHADERINFOLOGPROC)GETEXTENSIONADDRESS( "glGetShaderInfoLog" );
 		glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC)GETEXTENSIONADDRESS( "glGetProgramInfoLog" );
-		//glActiveTexture = (PFNGLACTIVETEXTUREPROC)GETEXTENSIONADDRESS( "glActiveTexture" );
+
+		#if defined ( _WIN32 )
+			glActiveTexture = (PFNGLACTIVETEXTUREPROC)GETEXTENSIONADDRESS( "glActiveTexture" );
+		#endif
 
 		// vao
 		glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)GETEXTENSIONADDRESS( "glGenVertexArrays" );
@@ -81,7 +84,10 @@ namespace slib {
 	PFNGLDELETEPROGRAMPROC glDeleteProgram;
 	PFNGLGETSHADERINFOLOGPROC glGetShaderInfoLog;
 	PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;
-	//PFNGLACTIVETEXTUREPROC glActiveTexture;
+
+	#if defined ( _WIN32 )
+		PFNGLACTIVETEXTUREPROC glActiveTexture;
+	#endif
 
 	PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
