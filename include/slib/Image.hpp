@@ -27,17 +27,21 @@ namespace slib {
 	public:
 		InterleavedView( T * _data, int _width, int _height, int _channels ) : data( _data ), width( _width ), height( _height ), channels( _channels ) { }
 
-		T& operator()( int x, int y, int c ) {
+		T& operator( )( int x, int y, int c ) {
 			return data[ y * width * channels + x * channels + c ];
 		}
 
-		int getWidth( ) { return width; }
-		int getHeight( ) { return height; }
-		int getChannels( ) { return channels; }
+		T operator( )( int x, int y, int c ) const {
+			return data[ y * width * channels + x * channels + c ];
+		}
+
+		int getWidth( ) const { return width; }
+		int getHeight( ) const { return height; }
+		int getChannels( ) const { return channels; }
 
 		class PixelIter {
 		private:
-			PixelIter( InterleavedView< T > & _view, int _index ) : view( _view ), index( _index ) { }
+			PixelIter( InterleavedView< T > _view, int _index ) : view( _view ), index( _index ) { }
 
 		public:
 			void incX( ) { index += channels; }
@@ -47,9 +51,10 @@ namespace slib {
 			void incC( ) { index++; }
 			void decC( ) { index--; }
 			T& operator*( ) { return view.data[ index ]; }
+			T operator*( ) const { return view.data[ index ]; }
 
 		private:
-			InterleavedView< T > & view;
+			InterleavedView< T > view;
 			int index;
 		};
 
@@ -69,6 +74,7 @@ namespace slib {
 		ChannelIter< T, Iter > operator++( int ) { iter.incC( ); return iter; }
 		ChannelIter< T, Iter > operator--( int ) { iter.decC( ); return iter; }
 		T& operator*( ) { return *iter; }
+		T operator*( ) const { return *iter; }
 	private:
 		Iter iter;
 	};
@@ -79,52 +85,52 @@ namespace slib {
 		template< class T >
 		class AddView {
 		public:
-			AddView( ViewT1< T > & _view1, ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
+			AddView( const ViewT1< T > & _view1, const ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view1( x, y, c % view1.getChannels( ) ) + view2( x, y, c % view2.getChannels( ) );
 			}
 
-			int getWidth( ) { return view1.getWidth( ); }
-			int getHeight( ) { return view1.getHeight( ); }
-			int getChannels( ) { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
+			int getWidth( ) const { return view1.getWidth( ); }
+			int getHeight( ) const { return view1.getHeight( ); }
+			int getChannels( ) const { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
 		private:
-			ViewT1< T > & view1;
-			ViewT2< T > & view2;
+			ViewT1< T > view1;
+			ViewT2< T > view2;
 		};
 
 		template< class T >
 		class SubtractView {
 		public:
-			SubtractView( ViewT1< T > & _view1, ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
+			SubtractView( const ViewT1< T > & _view1, const ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view1( x, y, c % view1.getChannels( ) ) - view2( x, y, c % view2.getChannels( ) );
 			}
 
-			int getWidth( ) { return view1.getWidth( ); }
-			int getHeight( ) { return view1.getHeight( ); }
-			int getChannels( ) { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
+			int getWidth( ) const { return view1.getWidth( ); }
+			int getHeight( ) const { return view1.getHeight( ); }
+			int getChannels( ) const { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
 		private:
-			ViewT1< T > & view1;
-			ViewT2< T > & view2;
+			ViewT1< T > view1;
+			ViewT2< T > view2;
 		};
 
 		template< class T >
 		class MultiplyView {
 		public:
-			MultiplyView( ViewT1< T > & _view1, ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
+			MultiplyView( const ViewT1< T > & _view1, const ViewT2< T > & _view2 )  : view1( _view1 ), view2( _view2 ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view1( x, y, c % view1.getChannels( ) ) * view2( x, y, c % view2.getChannels( ) );
 			}
 
-			int getWidth( ) { return view1.getWidth( ); }
-			int getHeight( ) { return view1.getHeight( ); }
-			int getChannels( ) { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
+			int getWidth( ) const { return view1.getWidth( ); }
+			int getHeight( ) const { return view1.getHeight( ); }
+			int getChannels( ) const { return std::max( view1.getChannels( ), view2.getChannels( ) ); }
 		private:
-			ViewT1< T > & view1;
-			ViewT2< T > & view2;
+			ViewT1< T > view1;
+			ViewT2< T > view2;
 		};
 	};
 
@@ -134,77 +140,81 @@ namespace slib {
 		template< class T >
 		class AddView {
 		public:
-			AddView( ViewT< T > & _view, T _addby ) : view( _view ), addby( _addby ) { }
+			AddView( const ViewT< T > & _view, T _addby ) : view( _view ), addby( _addby ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view( x, y, c ) + addby;
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			T addby;
 		};
 
 		template< class T >
 		class MultiplyView {
 		public:
-			MultiplyView( ViewT< T > & _view, float _multiplyby ) : view( _view ), multiplyby( _multiplyby ) { }
+			MultiplyView( const ViewT< T > & _view, float _multiplyby ) : view( _view ), multiplyby( _multiplyby ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view( x, y, c ) * multiplyby;
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			float multiplyby;
 		};
 
 		template< class T >
 		class DivideView {
 		public:
-			DivideView( ViewT< T > & _view, T _divideby ) : view( _view ), divideby( _divideby ) { }
+			DivideView( const ViewT< T > & _view, T _divideby ) : view( _view ), divideby( _divideby ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view( x, y, c ) / divideby;
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			T divideby;
 		};
 
 		template< class T >
 		class SingleChannelView {
 		public:
-			SingleChannelView( ViewT< T > & _view, int _channel ) : view( _view ), channel( _channel ) { }
+			SingleChannelView( const ViewT< T > & _view, int _channel ) : view( _view ), channel( _channel ) { }
 
-			T& operator()( int x, int y, int c ) {
+			T& operator( )( int x, int y, int c ) {
 				return view( x, y, channel );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return 1; }
+			T operator( )( int x, int y, int c ) const {
+				return view( x, y, channel );
+			}
+
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return 1; }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			int channel;
 		};
 
 		template< class T >
 		class LuminosityView {
 		public:
-			LuminosityView( ViewT< T > & _view ) : view( _view ) { }
+			LuminosityView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				//return std::accumulate( ChannelIter( view.getIter( x, y, 0 ) ), ChannelIter( view.getIter( x, y, view.getChannels( ) ) ) ) / view.getChannels( );
 				float sum = 0.0f;
 				for( int i = 0; i < view.getChannels( ); i++ ) {
@@ -213,80 +223,88 @@ namespace slib {
 				return sum / view.getChannels( );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 		};
 
 		template< class T >
 		class MirrorXView {
 		public:
-			MirrorXView( ViewT< T > & _view ) : view( _view ) { }
+			MirrorXView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T& operator()( int x, int y, int c ) {
+			T& operator( )( int x, int y, int c ) {
 				return view( view.getWidth( ) - 1 - x, y, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			T operator( )( int x, int y, int c ) const {
+				return view( view.getWidth( ) - 1 - x, y, c );
+			}
+
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T  > & view;
+			ViewT< T  > view;
 		};
 
 		template< class T >
 		class SubimageView {
 		public:
-			SubimageView( ViewT< T > & _view, int _startx, int _starty, int _width, int _height ) : view( _view ), startx( _startx ), starty( _starty ), width( _width ), height( _height ) { }
+			SubimageView( const ViewT< T > & _view, int _startx, int _starty, int _width, int _height ) : view( _view ), startx( _startx ), starty( _starty ), width( _width ), height( _height ) { }
 
-			T& operator()( int x, int y, int c ) {
+			T& operator( )( int x, int y, int c ) {
 				return view( startx + x, starty + y, c );
 			}
 
-			int getWidth( ) { return width; }
-			int getHeight( ) { return height; }
-			int getChannels( ) { return view.getChannels( ); }
+			T operator( )( int x, int y, int c ) const {
+				return view( startx + x, starty + y, c );
+			}
+
+			int getWidth( ) const { return width; }
+			int getHeight( ) const { return height; }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T  > & view;
+			ViewT< T > view;
 			int startx, starty, width, height;
 		};
 
 		template< class T >
 		class SubsampleView {
 		public:
-			SubsampleView( ViewT< T > & _view, int _factor ) : view( _view ), factor( _factor ) { }
+			SubsampleView( const ViewT< T > & _view, int _factor ) : view( _view ), factor( _factor ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				return view( x * factor, y * factor, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ) / factor; }
-			int getHeight( ) { return view.getHeight( ) / factor; }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ) / factor; }
+			int getHeight( ) const { return view.getHeight( ) / factor; }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			int factor;
 		};
 
 		template< class T >
 		class GaussianSubsampleView {
 		public:
-			GaussianSubsampleView( ViewT< T > & _view, int _factor ) : view( _view ), factor( _factor ) { }
+			GaussianSubsampleView( const ViewT< T > & _view, int _factor ) : view( _view ), factor( _factor ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				//return view( x / factor, y / factor, c );
 				return view( factor * x - 1, factor * y - 1, c ) / 16 + view( factor * x, factor * y - 1, c ) / 8 + view( factor * x + 1, factor * y - 1, c ) / 16 +
 					view( factor * x - 1, factor * y, c ) / 8 + view( factor * x, factor * y, c ) / 4 + view( factor * x + 1, factor * y, c ) / 8 +
 					view( factor * x - 1, factor * y + 1, c ) / 16 + view( factor * x, factor * y + 1, c ) / 8 + view( factor * x + 1, factor * y + 1, c ) / 16;
 			}
 
-			int getWidth( ) { return view.getWidth( ) / factor; }
-			int getHeight( ) { return view.getHeight( ) / factor; }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ) / factor; }
+			int getHeight( ) const { return view.getHeight( ) / factor; }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			int factor;
 		};
 
@@ -294,27 +312,27 @@ namespace slib {
 		class TransformView {
 		public:
 			// matrix is 3x3, row major
-			TransformView( ViewT< T > & _view, float * _matrix ) : view( _view ), matrix( _matrix ) { }
+			TransformView( const ViewT< T > & _view, float * _matrix ) : view( _view ), matrix( _matrix ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				float denom = matrix[ 6 ] * x + matrix[ 7 ] * y + matrix[ 8 ];
 				return view( ( matrix[ 0 ] * x + matrix[ 1 ] * y + matrix[ 2 ] ) / denom, ( matrix[ 3 ] * x + matrix[ 4 ] * y + matrix[ 5 ] ) / denom, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			float * matrix;
 		};
 
 		template< class T >
 		class ClampedView {
 		public:
-			ClampedView( ViewT< T > & _view ) : view( _view ) { }
+			ClampedView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator( )( int x, int y, int c ) const {
 				if( x < 0 ) {
 					return 0;
 				} else if( x >= view.getWidth( ) ) {
@@ -328,19 +346,19 @@ namespace slib {
 				}
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 		};
 
 		template< class T >
 		class MirrorEdgeView {
 		public:
-			MirrorEdgeView( ViewT< T > & _view ) : view( _view ) { }
+			MirrorEdgeView( const ViewT< T > & _view ) : view( _view ) { }
 
-			T operator()( int x, int y, int c ) {
+			T operator()( int x, int y, int c ) const {
 				if( x < 0 ) {
 					return 2 * (*this)( 0, y, c ) - (*this)( -x, y, c );
 				} else if( x >= view.getWidth( ) ) {
@@ -356,17 +374,17 @@ namespace slib {
 				}
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 		};
 
 		template< class T >
 		class ConvolveView {
 		public:
-			ConvolveView( ViewT< T > & _view, float * _kernel, int _kwidth, int _kheight ) : view( _view ), kernel( _kernel ), kwidth( _kwidth ), kheight( _kheight ) { }
+			ConvolveView( const ViewT< T > & _view, float * _kernel, int _kwidth, int _kheight ) : view( _view ), kernel( _kernel ), kwidth( _kwidth ), kheight( _kheight ) { }
 
 			T operator()( int x, int y, int c ) {
 				// rewrite using itertors
@@ -379,11 +397,11 @@ namespace slib {
 				return static_cast< T >( sum );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			float * kernel;
 			int kwidth, kheight;
 		};
@@ -391,7 +409,7 @@ namespace slib {
 		template< class T >
 		class CylindricalReprojectionView {
 		public:
-			CylindricalReprojectionView( ViewT< T > & _view, int _focallength ) : view( _view ), focallength( _focallength ) { }
+			CylindricalReprojectionView( const ViewT< T > & _view, int _focallength ) : view( _view ), focallength( _focallength ) { }
 
 			T operator()( int x, int y, int c ) {
 				float cylinderx = ( x - view.getWidth( ) / 2.0f ) / focallength, cylindery = ( y - view.getHeight( ) / 2.0f ) / focallength;
@@ -401,18 +419,18 @@ namespace slib {
 				return view( (int)finalx, (int)finaly, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			int focallength;
 		}; 
 
 		template< class T >
 		class UndistortedView {
 		public:
-			UndistortedView( ViewT< T > & _view, int _focallength, float _k1, float _k2 ) : view( _view ), focallength( _focallength ), k1( _k1 ), k2( _k2 ) { }
+			UndistortedView( const ViewT< T > & _view, int _focallength, float _k1, float _k2 ) : view( _view ), focallength( _focallength ), k1( _k1 ), k2( _k2 ) { }
 
 			T operator()( int x, int y, int c ) {
 				float normalizedx = ( x - view.getWidth( ) / 2.0f ) / focallength, normalizedy = ( y - view.getHeight( ) / 2.0f ) / focallength;
@@ -423,11 +441,11 @@ namespace slib {
 				return view( (int)finalx, (int)finaly, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 			int focallength;
 			float k1, k2;
 		}; 
@@ -435,7 +453,7 @@ namespace slib {
 		template< class T >
 		class DerivativeXView {
 		public:
-			DerivativeXView( ViewT< T > & _view ) : view( _view ) { }
+			DerivativeXView( const ViewT< T > & _view ) : view( _view ) { }
 
 			T operator()( int x, int y, int c ) {
 				// central differences operator
@@ -443,17 +461,17 @@ namespace slib {
 				//return view( x, y, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 		}; 
 
 		template< class T >
 		class DerivativeYView {
 		public:
-			DerivativeYView( ViewT< T > & _view ) : view( _view ) { }
+			DerivativeYView( const ViewT< T > & _view ) : view( _view ) { }
 
 			T operator()( int x, int y, int c ) {
 				// central differences operator
@@ -461,11 +479,11 @@ namespace slib {
 				//return view( x, y, c );
 			}
 
-			int getWidth( ) { return view.getWidth( ); }
-			int getHeight( ) { return view.getHeight( ); }
-			int getChannels( ) { return view.getChannels( ); }
+			int getWidth( ) const { return view.getWidth( ); }
+			int getHeight( ) const { return view.getHeight( ); }
+			int getChannels( ) const { return view.getChannels( ); }
 		private:
-			ViewT< T > & view;
+			ViewT< T > view;
 		}; 
 	};
 
@@ -481,122 +499,122 @@ namespace slib {
 	}*/
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template ClampedView< T > Clamp( ViewT< T > & view ) {
+	typename Composer< ViewT >::template ClampedView< T > Clamp( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template ClampedView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template MirrorEdgeView< T > MirrorEdge( ViewT< T > & view ) {
+	typename Composer< ViewT >::template MirrorEdgeView< T > MirrorEdge( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template MirrorEdgeView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template MirrorXView< T > MirrorX( ViewT< T > & view ) {
+	typename Composer< ViewT >::template MirrorXView< T > MirrorX( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template MirrorXView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template CylindricalReprojectionView< T > CylindricalReprojection( ViewT< T > & view, int focallength ) {
+	typename Composer< ViewT >::template CylindricalReprojectionView< T > CylindricalReprojection( const ViewT< T > & view, int focallength ) {
 		return typename Composer< ViewT >::template CylindricalReprojectionView< T >( view, focallength );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template UndistortedView< T > Undistort( ViewT< T > & view, int focallength, float k1, float k2 ) {
+	typename Composer< ViewT >::template UndistortedView< T > Undistort( const ViewT< T > & view, int focallength, float k1, float k2 ) {
 		return typename Composer< ViewT >::template UndistortedView< T >( view, focallength, k1, k2 );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template GaussianSubsampleView< T > GaussianSubsample( ViewT< T > & view, int factor ) {
+	typename Composer< ViewT >::template GaussianSubsampleView< T > GaussianSubsample( const ViewT< T > & view, int factor ) {
 		return typename Composer< ViewT >::template GaussianSubsampleView< T >( view, factor );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template SubsampleView< T > Subsample( ViewT< T > & view, int factor ) {
+	typename Composer< ViewT >::template SubsampleView< T > Subsample( const ViewT< T > & view, int factor ) {
 		return typename Composer< ViewT >::template SubsampleView< T >( view, factor );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template SingleChannelView< T > SingleChannel( ViewT< T > & view, int channel ) {
+	typename Composer< ViewT >::template SingleChannelView< T > SingleChannel( const ViewT< T > & view, int channel ) {
 		return typename Composer< ViewT >::template SingleChannelView< T >( view, channel );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template LuminosityView< T > Luminosity( ViewT< T > & view ) {
+	typename Composer< ViewT >::template LuminosityView< T > Luminosity( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template LuminosityView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template SubimageView< T > Subimage( ViewT< T > & view, int startx, int starty, int width, int height ) {
+	typename Composer< ViewT >::template SubimageView< T > Subimage( const ViewT< T > & view, int startx, int starty, int width, int height ) {
 		return typename Composer< ViewT >::template SubimageView< T >( view, startx, starty, width, height );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template DerivativeXView< T > DerivativeX( ViewT< T > & view ) {
+	typename Composer< ViewT >::template DerivativeXView< T > DerivativeX( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template DerivativeXView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template DerivativeYView< T > DerivativeY( ViewT< T > & view ) {
+	typename Composer< ViewT >::template DerivativeYView< T > DerivativeY( const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template DerivativeYView< T >( view );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template AddView< T > operator+( ViewT< T > & view, T addby ) {
+	typename Composer< ViewT >::template AddView< T > operator+( const ViewT< T > & view, T addby ) {
 		return typename Composer< ViewT >::template AddView< T >( view, addby );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template AddView< T > operator+( T addby, ViewT< T > & view ) {
+	typename Composer< ViewT >::template AddView< T > operator+( T addby, const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template AddView< T >( view, addby );
 	}
 
 	template< template< class > class ViewT1, template< class > class ViewT2, class T >
-	typename BinaryComposer< ViewT1, ViewT2 >::template AddView< T > operator+( ViewT1< T > & view1, ViewT2< T > & view2 ) {
+	typename BinaryComposer< ViewT1, ViewT2 >::template AddView< T > operator+( const ViewT1< T > & view1, const ViewT2< T > & view2 ) {
 		return typename BinaryComposer< ViewT1, ViewT2 >::template AddView< T >( view1, view2 );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template AddView< T > operator-( ViewT< T > & view, T subby ) {
+	typename Composer< ViewT >::template AddView< T > operator-( const ViewT< T > & view, T subby ) {
 		return typename Composer< ViewT >::template AddView< T >( view, -subby );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template AddView< T > operator-( T subby, ViewT< T > & view ) {
+	typename Composer< ViewT >::template AddView< T > operator-( T subby, const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template AddView< T >( view, -subby );
 	}
 
 	template< template< class > class ViewT1, template< class > class ViewT2, class T >
-	typename BinaryComposer< ViewT1, ViewT2 >::template SubtractView< T > operator-( ViewT1< T > & view1, ViewT2< T > & view2 ) {
+	typename BinaryComposer< ViewT1, ViewT2 >::template SubtractView< T > operator-( const ViewT1< T > & view1, const ViewT2< T > & view2 ) {
 		return typename BinaryComposer< ViewT1, ViewT2 >::template SubtractView< T >( view1, view2 );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template ConvolveView< T > operator*( ViewT< T > & view, const Kernel & kernel ) {
+	typename Composer< ViewT >::template ConvolveView< T > operator*( const ViewT< T > & view, const Kernel & kernel ) {
 		return typename Composer< ViewT >::template ConvolveView< T >( view, kernel.kernel, kernel.width, kernel.height );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template ConvolveView< T > operator*( const Kernel & kernel, ViewT< T > & view ) {
+	typename Composer< ViewT >::template ConvolveView< T > operator*( const Kernel & kernel, const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template ConvolveView< T >( view, kernel.kernel, kernel.width, kernel.height );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template MultiplyView< T > operator*( ViewT< T > & view, float multiplyby ) {
+	typename Composer< ViewT >::template MultiplyView< T > operator*( const ViewT< T > & view, float multiplyby ) {
 		return typename Composer< ViewT >::template MultiplyView< T >( view, multiplyby );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template MultiplyView< T > operator*( float multiplyby, ViewT< T > & view ) {
+	typename Composer< ViewT >::template MultiplyView< T > operator*( float multiplyby, const ViewT< T > & view ) {
 		return typename Composer< ViewT >::template MultiplyView< T >( view, multiplyby );
 	}
 
 	template< template< class > class ViewT, class T >
-	typename Composer< ViewT >::template DivideView< T > operator/( ViewT< T > & view, T divideby ) {
+	typename Composer< ViewT >::template DivideView< T > operator/( const ViewT< T > & view, T divideby ) {
 		return typename Composer< ViewT >::template DivideView< T >( view, divideby );
 	}
 
 	template< template< class > class ViewT1, template< class > class ViewT2, class T >
-	typename BinaryComposer< ViewT1, ViewT2 >::template MultiplyView< T > operator*( ViewT1< T > & view1, ViewT2< T > & view2 ) {
+	typename BinaryComposer< ViewT1, ViewT2 >::template MultiplyView< T > operator*( const ViewT1< T > & view1, const ViewT2< T > & view2 ) {
 		return typename BinaryComposer< ViewT1, ViewT2 >::template MultiplyView< T >( view1, view2 );
 	}
 
@@ -626,13 +644,13 @@ namespace slib {
 		template< class OutT >
 		class CastView {
 		public:
-			CastView( ViewT< InT > & _view ) : view( _view ) { }
+			CastView( const ViewT< InT > & _view ) : view( _view ) { }
 
 			OutT operator()( int x, int y, int c ) {
-				return Convert::convert< OutT, InT >( view( x, y, c ) );
+				return Convert< OutT, InT >::convert( view( x, y, c ) );
 			}
 		private:
-			ViewT< InT > & view;
+			ViewT< InT > view;
 		};
 	};
 

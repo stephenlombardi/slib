@@ -11,7 +11,7 @@
 using namespace slib;
 
 template< template< class > class ViewInT, template< class > class ViewOutT, class T >
-void copypixels( ViewInT< T > & in, ViewOutT< T > & out ) {
+void copypixels( const ViewInT< T > & in, ViewOutT< T > out ) {
 	int width = in.getWidth( ), height = in.getHeight( ), channels = in.getChannels( );
 	for( int y = 0; y < height; y++ ) {
 		for( int x = 0; x < width; x++ ) {
@@ -50,7 +50,7 @@ std::list< InterleavedView< T > > MakeGaussianPyramid( InterleavedView< T > orig
 ////////////////
 
 template< template< class > class ViewInT, class T >
-float getImage( ViewInT< T > & in, float x, float y, int c ) {
+float getImage( const ViewInT< T > & in, float x, float y, int c ) {
 	int ix = (int)x, iy = (int)y;
 	float ax = x - floor( x ), ay = y - floor( y );
 	return in( ix, iy, c ) * ( 1.0f - ax ) * ( 1.0f - ay ) +
@@ -62,7 +62,7 @@ float getImage( ViewInT< T > & in, float x, float y, int c ) {
 // optical flow
 
 template< template< class > class PT, class T >
-void gradientMatrix( PT< T > & image, float px, float py, int wx, int wy, float ox, float oy, float & gxx, float & gxy, float & gyy ) {
+void gradientMatrix( const PT< T > & image, float px, float py, int wx, int wy, float ox, float oy, float & gxx, float & gxy, float & gyy ) {
 	gxx = gxy = gyy = 0.0f;
 
 	//for( int y = py - wy; y <= py + wy; y++ ) {
@@ -102,7 +102,7 @@ void gradientMatrix( PT< T > & image, float px, float py, int wx, int wy, float 
 }
 
 template< template< class > class PT1, template< class > class PT2, class T >
-void mismatchVector( PT1< T > & image1, PT2< T > & image2, float px, float py, int wx, int wy, float ox, float oy, float & bx, float & by ) {
+void mismatchVector( const PT1< T > & image1, const PT2< T > & image2, float px, float py, int wx, int wy, float ox, float oy, float & bx, float & by ) {
 	bx = by = 0.0f;
 
 	//for( int y = py - wy; y <= py + wy; y++ ) {
@@ -152,8 +152,8 @@ void opticalFlow( std::list< PT1< T > > & pyramid1, std::list< PT1< T > > & pyra
 	float guessx = 0.0f, guessy = 0.0f;
 
 	int l = pyramid1.size( ) - 1;
-	std::list< PT1< T > >::reverse_iterator piter1 = pyramid1.rbegin( );
-	std::list< PT1< T > >::reverse_iterator piter2 = pyramid2.rbegin( );
+	typename std::list< PT1< T > >::reverse_iterator piter1 = pyramid1.rbegin( );
+	typename std::list< PT1< T > >::reverse_iterator piter2 = pyramid2.rbegin( );
 	for( ; piter1 != pyramid1.rend( ); piter1++, piter2++, l-- ) {
 		float px = ux / pow( 2.0, l ), py = uy / pow( 2.0, l );
 
@@ -206,7 +206,7 @@ void opticalFlow( std::list< PT1< T > > & pyramid1, std::list< PT1< T > > & pyra
 }
 
 template< template< class > class ViewT1, template< class > class ViewT2, class T2 > 
-void GradientMatrix( ViewT1< unsigned char > & view1, ViewT2< T2 > & view2 ) {
+void GradientMatrix( const ViewT1< unsigned char > & view1, ViewT2< T2 > view2 ) {
 	for( int y = 0; y < view1.getHeight( ); y++ ) {
 		for( int x = 0; x < view1.getWidth( ); x++ ) {
 			char ix = view1( x + 1, y, 0 ) - view1( x - 1, y, 0 );
@@ -253,7 +253,7 @@ int main( ) {
 	//std::list< InterleavedView< unsigned char > > pyramid2 = MakeGaussianPyramid( Interleaved( dataout2, width2, height2, depth2 / 8 ), 7 );
 
 	std::ofstream tgafileout( "out1.tga", std::ios::binary );
-	TGA::SetData( tgafileout, width1, height1, depth1, dataout1 );
+	WriteTGA( tgafileout, width1, height1, depth1, dataout1 );
 	tgafileout.close( );
 
 	//tgafileout.open( "out2.tga", std::ios::binary );
