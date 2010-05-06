@@ -6,6 +6,8 @@
 
 #include <GL/freeglut.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include <slib/Matrix.hpp>
 #include <slib/MS3D.h>
 #include <slib/TGA.h>
@@ -20,6 +22,133 @@
 
 using namespace slib;
 
+mat4f KeyframeMatrix( const JointAnimation::JointPose & pose ) {
+	mat4f result = MultiplicitiveIdentity< mat4f >::Identity( );
+	Sub< 3, 3 >::Matrix( result ) = RotationMatrixX( pose.rotation[ 0 ] ) * RotationMatrixY( pose.rotation[ 1 ] ) * RotationMatrixZ( pose.rotation[ 2 ] );
+	Sub< 3, 1 >::Matrix( result, 0, 3 ) = Vec< 3 >::Tor( pose.position );
+	return result;
+}
+
+class AnimBase;
+typedef boost::shared_ptr< AnimBase > animptr_t;
+
+class AnimBase {
+public:
+	virtual JointAnimation::JointPose operator( )( float time ) const = 0;
+	virtual animptr_t simplify( float time ) {
+		return clone( );
+	}
+	virtual animptr_t clone( ) const = 0;
+	virtual int nodes( ) = 0;
+private:
+};
+
+class AnimAnim : public AnimBase {
+public:
+	AnimAnim( const JointAnimation & jointanim, float animstart, bool loop ) : jointanim_( jointanim ), animstart_( animstart ), loop_( loop ) { }
+	JointAnimation::JointPose operator( )( float time ) const {
+		return jointanim_.GetInterpolatedKeyframe( time - animstart_, loop_ );
+	}
+	animptr_t clone( ) const {
+		return animptr_t( new AnimAnim( jointanim_, animstart_, loop_ ) );
+	}
+	int nodes( ) {
+		return 1;
+	}
+private:
+	JointAnimation jointanim_;
+	float animstart_;
+	bool loop_;
+};
+
+class AnimTransition : public AnimBase {
+public:
+	AnimTransition( boost::shared_ptr< AnimBase > a0, boost::shared_ptr< AnimBase > a1, float transstart, float transtime ) : a0_( a0 ), a1_( a1 ), transstart_( transstart ), transtime_( transtime ) { }
+	JointAnimation::JointPose operator( )( float time ) const {
+		float alpha = ( time - transstart_ ) / transtime_;
+		alpha = alpha < 0.0f ? 0.0f : ( alpha > 1.0f ? 1.0f : alpha );
+		return lerpPose( (*a0_)( time ), (*a1_)( time ), alpha );
+	}
+	animptr_t simplify( float time ) {
+		return time - transstart_ > transtime_ ? a1_->simplify( time ) : clone( );
+	}
+	animptr_t clone( ) const {
+		return animptr_t( new AnimTransition( a0_, a1_, transstart_, transtime_ ) );
+	}
+	int nodes( ) {
+		return a0_->nodes( ) + a1_->nodes( ) + 1;
+	}
+private:
+	boost::shared_ptr< AnimBase > a0_, a1_;
+	float transstart_, transtime_;
+};
+
+class AnimBlend : public AnimBase {
+public:
+	AnimBlend( boost::shared_ptr< AnimBase > a0, boost::shared_ptr< AnimBase > a1, float weight ) : a0_( a0 ), a1_( a1 ), weight_( weight ) { }
+	JointAnimation::JointPose operator( )( float time ) const {
+		return lerpPose( (*a0_)( time ), (*a1_)( time ), weight_ );
+	}
+	animptr_t simplify( float time ) {
+		return weight_ == 0.0f ? a0_ : ( weight_ == 1.0f ? a1_->simplify( time ) : clone( ) );
+	}
+	animptr_t clone( ) const {
+		return animptr_t( new AnimBlend( a0_, a1_, weight_ ) );
+	}
+	int nodes( ) {
+		return a0_->nodes( ) + a1_->nodes( ) + 1;
+	}
+private:
+	boost::shared_ptr< AnimBase > a0_, a1_;
+	float weight_;
+};
+
+class AnimController {
+public:
+	void setSize( size_t s ) {
+		curranim_.resize( s );
+	}
+
+	void setAnimation( const std::vector< JointAnimation > & anim, float time, bool loop ) {
+		for( size_t i = 0; i < curranim_.size( ); i++ ) {
+			curranim_[ i ] = animptr_t( new AnimAnim( anim[ i ], time, loop ) );
+		}
+	}
+
+	void setAnimation( const std::vector< JointAnimation > & anim, float time, bool loop, float transtime ) {
+		for( size_t i = 0; i < curranim_.size( ); i++ ) {
+			curranim_[ i ] = animptr_t( new AnimTransition( curranim_[ i ], animptr_t( new AnimAnim( anim[ i ], time, loop ) ), time, transtime ) );
+		}
+	}
+
+	template< class OutputIter >
+	void toMatrix( float time, OutputIter out ) {
+		for( size_t i = 0; i < curranim_.size( ); i++, ++out ) {
+			if( curranim_[ i ].get( ) ) {
+				*out = KeyframeMatrix( (*curranim_[ i ])( time ) );
+			}
+		}
+	}
+
+	void simplify( float time ) {
+		for( size_t i = 0; i < curranim_.size( ); i++ ) {
+			curranim_[ i ] = curranim_[ i ]->simplify( time );
+		}
+	}
+
+	float nodes( ) {
+		float n = 0.0f;
+		for( size_t i = 0; i < curranim_.size( ); i++ ) {
+			if( curranim_[ i ].get( ) ) {
+				n += curranim_[ i ]->nodes( );
+			}
+		}
+		return n / curranim_.size( );
+	}
+private:
+	std::vector< animptr_t > curranim_;
+};
+
 int width = 512, height = 512;
 
 // animation
@@ -27,6 +156,8 @@ BoneMatrixContainer matrixContainer;
 std::map< std::string, std::vector< JointAnimation > > animations;
 std::string currentanimation, nextanimation;
 std::vector< float > weights;
+
+AnimController animctrl;
 
 // mesh data
 Shader animshader;
@@ -48,13 +179,6 @@ float transitionstart = 0.0f;
 float transitiontime = 1.0f;
 bool loop = true;
 
-mat4f KeyframeMatrix( const JointAnimation::JointPose & pose ) {
-	mat4f result = MultiplicitiveIdentity< mat4f >::Identity( );
-	Sub< 3, 3 >::Matrix( result ) = RotationMatrixX( pose.rotation[ 0 ] ) * RotationMatrixY( pose.rotation[ 1 ] ) * RotationMatrixZ( pose.rotation[ 2 ] );
-	Sub< 3, 1 >::Matrix( result, 0, 3 ) = Vec< 3 >::Tor( pose.position );
-	return result;
-}
-
 void executeCommand( const std::string & cmd ) {
 	std::istringstream cmdstream( cmd );
 
@@ -72,6 +196,8 @@ void executeCommand( const std::string & cmd ) {
 			currentanimation = animname;
 			transition = false;
 			animstart = currtime;
+
+			animctrl.setAnimation( animations[ animname ], currtime, loop );
 		}
 	} else if( cmdname == "weight" ) {
 		int jointindexstart, jointindexend;
@@ -89,9 +215,13 @@ void executeCommand( const std::string & cmd ) {
 			nextanimation = animname;
 			transition = true;
 			transitionstart = currtime;
+
+			animctrl.setAnimation( animations[ animname ], currtime, loop, transitiontime );
 		}
 	} else if( cmdname == "loop" ) {
 		cmdstream >> loop;
+	} else if( cmdname == "simplify" ) {
+		animctrl.simplify( currtime );
 	}
 }
 
@@ -188,6 +318,7 @@ void initMesh( ) {
 
 	InverseTransform( vertices, normals, meshloader.GetBoneIds( ), matrixContainer.GetMatrices( ) );
 
+	animctrl.setSize( jointanimations.size( ) );
 	for( std::map< std::string, std::pair< int, int > >::iterator iter = animationinfo.begin( ); iter != animationinfo.end( ); ++iter ) {
 		animations[ iter->first ].resize( jointanimations.size( ) );
 		for( size_t i = 0; i < jointanimations.size( ); i++ ) {
@@ -273,7 +404,7 @@ void display( ) {
 }
 
 void timerfunc( int value ) {
-	if( transition ) {
+	/*if( transition ) {
 		if( animations.find( currentanimation ) != animations.end( ) ) {
 			if( animations.find( nextanimation ) != animations.end( ) ) {
 				float alpha = ( currtime - transitionstart ) / transitiontime;
@@ -308,7 +439,13 @@ void timerfunc( int value ) {
 			}
 			matrixContainer.Calculate( transformations.begin( ), transformations.end( ) );
 		}
-	}
+	}*/
+
+	std::vector< mat4f > transformations( animations.begin( )->second.size( ) );
+	animctrl.toMatrix( currtime, transformations.begin( ) );
+	matrixContainer.Calculate( transformations.begin( ), transformations.end( ) );
+
+	std::cout << animctrl.nodes( ) << std::endl;
 
 	currtime += 0.030f;
 
